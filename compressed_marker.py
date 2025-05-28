@@ -1,3 +1,9 @@
+"""
+SmartCompress FS - Compressed File Marker Module
+Manages metadata for compressed files to avoid double compression
+and enable safe decompression
+"""
+
 import json
 import os
 import hashlib
@@ -7,9 +13,17 @@ from logger import get_logger
 
 
 class CompressedMarker:
+    """Manages metadata for compressed files"""
     
     def __init__(self, metadata_dir: str = "metadata", 
                  metadata_file: str = "compression_metadata.json"):
+        """
+        Initialize the compressed marker system
+        
+        Args:
+            metadata_dir: Directory to store metadata files
+            metadata_file: Name of the metadata file
+        """
         self.metadata_dir = metadata_dir
         self.metadata_file = metadata_file
         self.metadata_path = os.path.join(metadata_dir, metadata_file)
@@ -55,7 +69,15 @@ class CompressedMarker:
             raise
     
     def _calculate_file_hash(self, file_path: str) -> str:
+        """
+        Calculate SHA-256 hash of a file
         
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            SHA-256 hash string
+        """
         hash_sha256 = hashlib.sha256()
         try:
             with open(file_path, "rb") as f:
@@ -69,6 +91,19 @@ class CompressedMarker:
     def mark_as_compressed(self, original_path: str, compressed_path: str,
                           original_size: int, compressed_size: int,
                           compression_method: str = "gzip") -> bool:
+        """
+        Mark a file as compressed and store metadata
+        
+        Args:
+            original_path: Original file path
+            compressed_path: Compressed file path
+            original_size: Original file size in bytes
+            compressed_size: Compressed file size in bytes
+            compression_method: Compression method used
+            
+        Returns:
+            True if successfully marked, False otherwise
+        """
         try:
             metadata = self._load_metadata()
             
@@ -103,6 +138,15 @@ class CompressedMarker:
             return False
     
     def is_compressed(self, file_path: str) -> bool:
+        """
+        Check if a file is already compressed
+        
+        Args:
+            file_path: Path to check
+            
+        Returns:
+            True if file is marked as compressed, False otherwise
+        """
         try:
             metadata = self._load_metadata()
             return file_path in metadata["compressed_files"]
@@ -111,6 +155,15 @@ class CompressedMarker:
             return False
     
     def get_compressed_file_info(self, original_path: str) -> Optional[Dict[str, Any]]:
+        """
+        Get metadata for a compressed file
+        
+        Args:
+            original_path: Original file path
+            
+        Returns:
+            File metadata dictionary or None if not found
+        """
         try:
             metadata = self._load_metadata()
             return metadata["compressed_files"].get(original_path)
@@ -119,6 +172,12 @@ class CompressedMarker:
             return None
     
     def get_all_compressed_files(self) -> List[Dict[str, Any]]:
+        """
+        Get list of all compressed files
+        
+        Returns:
+            List of file metadata dictionaries
+        """
         try:
             metadata = self._load_metadata()
             return list(metadata["compressed_files"].values())
@@ -127,7 +186,15 @@ class CompressedMarker:
             return []
     
     def unmark_compressed(self, original_path: str) -> bool:
-
+        """
+        Remove a file from compressed files list
+        
+        Args:
+            original_path: Original file path to unmark
+            
+        Returns:
+            True if successfully unmarked, False otherwise
+        """
         try:
             metadata = self._load_metadata()
             
@@ -145,6 +212,12 @@ class CompressedMarker:
             return False
     
     def get_compression_stats(self) -> Dict[str, Any]:
+        """
+        Get compression statistics
+        
+        Returns:
+            Dictionary with compression statistics
+        """
         try:
             metadata = self._load_metadata()
             compressed_files = metadata["compressed_files"]
@@ -176,6 +249,12 @@ class CompressedMarker:
             return {}
     
     def cleanup_invalid_entries(self) -> int:
+        """
+        Remove entries for files that no longer exist
+        
+        Returns:
+            Number of entries cleaned up
+        """
         try:
             metadata = self._load_metadata()
             compressed_files = metadata["compressed_files"].copy()

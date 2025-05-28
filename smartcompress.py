@@ -1,3 +1,8 @@
+"""
+SmartCompress FS - Main Compression and Monitoring Module
+Monitors disk usage and automatically compresses files when threshold is exceeded
+"""
+
 import os
 import gzip
 import zlib
@@ -11,9 +16,16 @@ from tanisha_module import TanishaModule, FileInfo
 
 
 class SmartCompressFS:
+    """Main class for SmartCompress FS functionality"""
     
     def __init__(self, base_directory: str = None, disk_threshold: float = 90.0):
-
+        """
+        Initialize SmartCompress FS
+        
+        Args:
+            base_directory: Base directory to monitor and compress files
+            disk_threshold: Disk usage percentage threshold to trigger compression
+        """
         self.base_directory = base_directory or os.getcwd()
         self.disk_threshold = disk_threshold
         self.logger = get_logger()
@@ -33,6 +45,15 @@ class SmartCompressFS:
                            f"Threshold: {disk_threshold}%")
     
     def get_disk_usage(self, path: str = None) -> Dict[str, Any]:
+        """
+        Get disk usage information for a given path
+        
+        Args:
+            path: Path to check (defaults to base_directory)
+            
+        Returns:
+            Dictionary with disk usage information
+        """
         check_path = path or self.base_directory
         
         try:
@@ -59,6 +80,15 @@ class SmartCompressFS:
             return {}
     
     def should_trigger_compression(self, path: str = None) -> bool:
+        """
+        Check if disk usage exceeds threshold and compression should be triggered
+        
+        Args:
+            path: Path to check (defaults to base_directory)
+            
+        Returns:
+            True if compression should be triggered, False otherwise
+        """
         disk_info = self.get_disk_usage(path)
         
         if not disk_info:
@@ -73,6 +103,15 @@ class SmartCompressFS:
         return False
     
     def compress_file(self, file_info: FileInfo) -> bool:
+        """
+        Compress a single file
+        
+        Args:
+            file_info: FileInfo object containing file details
+            
+        Returns:
+            True if compression successful, False otherwise
+        """
         try:
             original_path = file_info.path
             
@@ -132,6 +171,15 @@ class SmartCompressFS:
             return False
     
     def compress_files(self, max_files: int = None) -> Dict[str, Any]:
+        """
+        Compress multiple files based on priority
+        
+        Args:
+            max_files: Maximum number of files to compress
+            
+        Returns:
+            Dictionary with compression results
+        """
         max_files = max_files or self.max_files_per_batch
         
         # Get priority files for compression
@@ -179,6 +227,12 @@ class SmartCompressFS:
         return results
     
     def auto_compress_if_needed(self) -> bool:
+        """
+        Check disk usage and compress files if threshold is exceeded
+        
+        Returns:
+            True if compression was triggered, False otherwise
+        """
         if self.should_trigger_compression():
             self.logger.log_info("Auto-compression triggered due to disk usage threshold")
             results = self.compress_files()
@@ -192,6 +246,12 @@ class SmartCompressFS:
         return False
     
     def start_monitoring(self) -> bool:
+        """
+        Start continuous disk monitoring
+        
+        Returns:
+            True if monitoring started successfully, False otherwise
+        """
         if self.monitoring:
             self.logger.log_warning("Monitoring is already running")
             return False
@@ -210,6 +270,12 @@ class SmartCompressFS:
             return False
     
     def stop_monitoring(self) -> bool:
+        """
+        Stop continuous disk monitoring
+        
+        Returns:
+            True if monitoring stopped successfully, False otherwise
+        """
         if not self.monitoring:
             self.logger.log_warning("Monitoring is not running")
             return False
@@ -241,7 +307,16 @@ class SmartCompressFS:
         self.logger.log_info("Monitoring loop ended")
     
     def _compress_gzip(self, input_path: str, output_path: str) -> bool:
-
+        """
+        Compress file using gzip
+        
+        Args:
+            input_path: Path to input file
+            output_path: Path to output compressed file
+            
+        Returns:
+            True if successful, False otherwise
+        """
         try:
             with open(input_path, 'rb') as f_in:
                 with gzip.open(output_path, 'wb') as f_out:
@@ -252,7 +327,16 @@ class SmartCompressFS:
             return False
     
     def _compress_zlib(self, input_path: str, output_path: str) -> bool:
-
+        """
+        Compress file using zlib
+        
+        Args:
+            input_path: Path to input file
+            output_path: Path to output compressed file
+            
+        Returns:
+            True if successful, False otherwise
+        """
         try:
             with open(input_path, 'rb') as f_in:
                 data = f_in.read()

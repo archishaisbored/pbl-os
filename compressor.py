@@ -1,3 +1,8 @@
+"""
+SmartCompress FS - GUI Module
+Tkinter-based graphical user interface for manual control and monitoring
+"""
+
 import os
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox, filedialog
@@ -10,8 +15,10 @@ from logger import get_logger
 
 
 class SmartCompressGUI:
+    """GUI application for SmartCompress FS"""
 
     def __init__(self):
+        """Initialize the GUI application"""
         self.logger = get_logger()
         self.smartcompress = None
         self.decompressor = DecompressionManager()
